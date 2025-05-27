@@ -2,12 +2,14 @@ package br.com.guntz.sensors.temperature.monitoring.domain.model;
 
 import io.hypersistence.tsid.TSID;
 import jakarta.persistence.Embeddable;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Objects;
 
+@EqualsAndHashCode
 @Getter
 @Embeddable
 @NoArgsConstructor
