@@ -6,8 +6,13 @@ import br.com.guntz.sensors.temperature.monitoring.domain.model.SensorMonitoring
 import br.com.guntz.sensors.temperature.monitoring.domain.repository.SensorMonitoringRepository;
 import io.hypersistence.tsid.TSID;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.Duration;
 
 @AllArgsConstructor
 @RestController
@@ -27,6 +32,10 @@ public class SensorMonitoringController {
     public ResponseEntity<Object> enable(@PathVariable TSID sensorId) {
         SensorMonitoring sensorMonitoring = findByIdOrDefault(sensorId);
 
+        if (sensorMonitoring.getEnabled()) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
         sensorMonitoring.setEnabled(true);
         sensorMonitoringRepository.saveAndFlush(sensorMonitoring);
 
@@ -34,8 +43,13 @@ public class SensorMonitoringController {
     }
 
     @DeleteMapping("/enable")
+    @SneakyThrows
     public ResponseEntity<Object> disable(@PathVariable TSID sensorId) {
         SensorMonitoring sensorMonitoring = findByIdOrDefault(sensorId);
+
+        if (!sensorMonitoring.getEnabled()) {
+            Thread.sleep(Duration.ofSeconds(10000).toSeconds());
+        }
 
         sensorMonitoring.setEnabled(false);
         sensorMonitoringRepository.saveAndFlush(sensorMonitoring);
