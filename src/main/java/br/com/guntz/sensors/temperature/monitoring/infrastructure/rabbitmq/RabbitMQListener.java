@@ -1,16 +1,15 @@
 package br.com.guntz.sensors.temperature.monitoring.infrastructure.rabbitmq;
 
 import br.com.guntz.sensors.temperature.monitoring.api.model.TemperatureLogData;
+import br.com.guntz.sensors.temperature.monitoring.domain.service.TemperatureMonitoringService;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.Map;
 
 import static br.com.guntz.sensors.temperature.monitoring.infrastructure.rabbitmq.RabbitMQConfig.QUEUE;
 
@@ -19,17 +18,14 @@ import static br.com.guntz.sensors.temperature.monitoring.infrastructure.rabbitm
 @Component
 public class RabbitMQListener {
 
-    @RabbitListener(queues = QUEUE)
+    private final TemperatureMonitoringService temperatureMonitoringService;
+
+    @RabbitListener(queues = QUEUE, concurrency = "2-3")
     @SneakyThrows
-    public void handle(@Payload TemperatureLogData temperatureLogData,
-                       @Headers Map<String, Object> headers) {
-        log.info("Temperature updated: SensorId {} Temp {}",
-                temperatureLogData.getSensorId().toString(),
-                temperatureLogData.getValue().toString());
+    public void handle(@Payload TemperatureLogData temperatureLogData) {
 
-        log.info("Headers: {}", headers.toString());
-
-        Thread.sleep(Duration.ofSeconds(10000).toSeconds());
+        temperatureMonitoringService.processTemperatureReading(temperatureLogData);
+        Thread.sleep(Duration.ofSeconds(5000).toSeconds());
     }
 
 }

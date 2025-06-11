@@ -5,7 +5,7 @@ spring:
   application.name: temperature-monitoring
   datasource:
     username: sa
-    url: jdbc:h2:file:~/guntz-sensors-temperature-monitoring-db;CASE_INSENSITIVE_IDENTIFIERS=TRUE;
+    url: jdbc:h2:file:~/guntz-sensors-temperature-monitoring-db;CASE_INSENSITIVE_IDENTIFIERS=true;AUTO_SERVER=true
     driverClassName: org.h2.Driver
     password: '123'
   h2:
@@ -17,13 +17,16 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
-    show-sql: 'true'
+    show-sql: 'false'
     properties:
       hibernate:
-        format_sql: 'true'
+        format_sql: 'false'
   #RABBITMQ
   rabbitmq:
     host: localhost
     port: 5672
     username: ${RABBITMQ_DEFAUL_USER}
     password: ${RABBITMQ_DEFAUL_PASS}
+    listener:
+      simple:
+        prefetch: 4
