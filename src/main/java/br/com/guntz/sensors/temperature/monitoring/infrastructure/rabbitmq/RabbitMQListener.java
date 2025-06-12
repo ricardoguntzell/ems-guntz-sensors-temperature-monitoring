@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
-import static br.com.guntz.sensors.temperature.monitoring.infrastructure.rabbitmq.RabbitMQConfig.QUEUE;
+import static br.com.guntz.sensors.temperature.monitoring.infrastructure.rabbitmq.RabbitMQConfig.QUEUE_ALERTING;
+import static br.com.guntz.sensors.temperature.monitoring.infrastructure.rabbitmq.RabbitMQConfig.QUEUE_PROCESS_TEMPERATURE;
 
 @AllArgsConstructor
 @Slf4j
@@ -20,12 +21,22 @@ public class RabbitMQListener {
 
     private final TemperatureMonitoringService temperatureMonitoringService;
 
-    @RabbitListener(queues = QUEUE, concurrency = "2-3")
+    @RabbitListener(queues = QUEUE_PROCESS_TEMPERATURE, concurrency = "2-3")
     @SneakyThrows
-    public void handle(@Payload TemperatureLogData temperatureLogData) {
-
+    public void handleProcessTemperature(@Payload TemperatureLogData temperatureLogData) {
         temperatureMonitoringService.processTemperatureReading(temperatureLogData);
         Thread.sleep(Duration.ofSeconds(5000).toSeconds());
     }
+
+    @RabbitListener(queues = QUEUE_ALERTING, concurrency = "2-3")
+    @SneakyThrows
+    public void handleAlerting(@Payload TemperatureLogData temperatureLogData) {
+        log.info("Alerting: SensorId {} Temp {}",
+                temperatureLogData.getSensorId(),
+                temperatureLogData.getValue());
+
+        Thread.sleep(Duration.ofSeconds(5000).toSeconds());
+    }
+
 
 }
