@@ -1,6 +1,7 @@
 package br.com.guntz.sensors.temperature.monitoring.infrastructure.rabbitmq;
 
 import br.com.guntz.sensors.temperature.monitoring.api.model.TemperatureLogData;
+import br.com.guntz.sensors.temperature.monitoring.domain.service.SensorAlertService;
 import br.com.guntz.sensors.temperature.monitoring.domain.service.TemperatureMonitoringService;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -20,6 +21,7 @@ import static br.com.guntz.sensors.temperature.monitoring.infrastructure.rabbitm
 public class RabbitMQListener {
 
     private final TemperatureMonitoringService temperatureMonitoringService;
+    private final SensorAlertService sensorAlertService;
 
     @RabbitListener(queues = QUEUE_PROCESS_TEMPERATURE, concurrency = "2-3")
     @SneakyThrows
@@ -31,10 +33,7 @@ public class RabbitMQListener {
     @RabbitListener(queues = QUEUE_ALERTING, concurrency = "2-3")
     @SneakyThrows
     public void handleAlerting(@Payload TemperatureLogData temperatureLogData) {
-        log.info("Alerting: SensorId {} Temp {}",
-                temperatureLogData.getSensorId(),
-                temperatureLogData.getValue());
-
+        sensorAlertService.processAlertReading(temperatureLogData);
         Thread.sleep(Duration.ofSeconds(5000).toSeconds());
     }
 
